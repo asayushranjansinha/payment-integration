@@ -15,6 +15,7 @@
     "dotenv-cli": "^11.0.0",
     "mprocs": "^0.7.3",
     "next": "15.5.4",
+    "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

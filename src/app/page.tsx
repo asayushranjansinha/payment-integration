@@ -1,103 +1,135 @@
-import Image from "next/image";
+"use client";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+import {
+  createRazorpayOrder,
+  createRazorpaySubscription,
+} from "@/features/payments/razorpay/server/actions";
+
+const CUSTOMER_EMAIL = "asayushranjansinha@gmail.com";
+const CUSTOMER_NAME = "Ayush Ranjan Sinha";
+const CUSTOMER_CONTACT = "+919876543210";
+const PRODUCT_NAME = "Razorpay Integration Template";
+
+const Page = () => {
+  const router = useRouter();
+
+  async function handleOneTimePurchase() {
+    const { amount, orderId } = await createRazorpayOrder(100, "INR");
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount,
+      currency: "INR",
+      name: PRODUCT_NAME,
+      description: "One-time purchase",
+      order_id: orderId,
+      prefill: {
+        name: CUSTOMER_NAME,
+        email: CUSTOMER_EMAIL,
+        contact: CUSTOMER_CONTACT,
+      },
+      handler: async (response: any) => {
+        const res = await fetch("/api/razorpay/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          }),
+        });
+        const body = await res.json();
+        router.push(
+          body.verified
+            ? `/payments/success?orderId=${encodeURIComponent(orderId)}`
+            : `/payments/failure?orderId=${encodeURIComponent(orderId)}`
+        );
+      },
+    };
+
+    new (window as any).Razorpay(options).open();
+  }
+
+  async function handleSubscriptionPurchase() {
+    const planId = process.env.NEXT_PUBLIC_PLAN_ID!;
+    const { subscriptionId } = await createRazorpaySubscription(
+      planId,
+      CUSTOMER_EMAIL,
+      12
+    );
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      subscription_id: subscriptionId,
+      name: PRODUCT_NAME,
+      description: "Recurring subscription",
+      currency: "INR",
+      prefill: {
+        name: CUSTOMER_NAME,
+        email: CUSTOMER_EMAIL,
+        contact: CUSTOMER_CONTACT,
+      },
+      handler: async (response: any) => {
+        const res = await fetch("/api/razorpay/verify-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_subscription_id: response.razorpay_subscription_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          }),
+        });
+        const body = await res.json();
+        router.push(
+          body.verified
+            ? `/subscription/success?subscriptionId=${encodeURIComponent(
+                subscriptionId
+              )}`
+            : `/subscription/failure?subscriptionId=${encodeURIComponent(
+                subscriptionId
+              )}`
+        );
+      },
+    };
+
+    new (window as any).Razorpay(options).open();
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen bg-linear-to-b from-neutral-900 to-black text-white flex items-center justify-center p-6">
+      <section className="w-full max-w-md bg-neutral-800/40 backdrop-blur-lg border border-neutral-700/50 rounded-2xl p-8 shadow-xl">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            Razorpay Test
+          </h1>
+          <p className="text-neutral-400 text-sm">
+            Payments & Subscriptions demo
+          </p>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="grid gap-4">
+          <button
+            onClick={handleOneTimePurchase}
+            className="w-full py-3 text-lg font-semibold rounded-2xl border border-neutral-600/60 hover:border-neutral-400 hover:bg-neutral-700/40 transition transform hover:scale-[1.02] active:scale-95 shadow-md"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Pay ₹100 Once
+          </button>
+
+          <button
+            onClick={handleSubscriptionPurchase}
+            className="w-full py-3 text-lg font-semibold rounded-2xl border border-neutral-600/60 hover:border-neutral-400 hover:bg-neutral-700/40 transition transform hover:scale-[1.02] active:scale-95 shadow-md"
           >
-            Read our docs
-          </a>
+            Start Subscription
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <footer className="text-center mt-8 text-neutral-500 text-xs">
+          Template • Next.js • Razorpay
+        </footer>
+      </section>
+    </main>
   );
-}
+};
+
+export default Page;
