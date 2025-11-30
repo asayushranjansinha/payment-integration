@@ -1,3 +1,12 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { FC } from "react";
 
@@ -9,26 +18,37 @@ const SubscriptionFailure: FC<Props> = async ({ searchParams }) => {
   const { subscriptionId } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="bg-yellow-900/15 border border-yellow-700/40 rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
-        <h1 className="text-3xl font-bold mb-2">Subscription Failed ⚠️</h1>
-        <p className="text-neutral-400 mb-5">
-          We couldn't activate your subscription.
-        </p>
+    <main className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center space-y-2">
+          <AlertCircleIcon className="h-14 w-14 mx-auto text-red-700 opacity-90" />
+          <CardTitle className="text-2xl font-bold tracking-tight text-red-700">
+            Subscription Failed
+          </CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            Amount has not been deducted.
+          </CardDescription>
+        </CardHeader>
 
-        {subscriptionId && (
-          <div className="bg-neutral-800/50 px-3 py-2 rounded-lg text-sm break-all font-mono mb-6">
-            {subscriptionId}
-          </div>
-        )}
+        <CardContent className="px-7 pb-7 flex flex-col gap-5 text-center">
+          {subscriptionId && (
+            <div className="w-full px-4 py-3 rounded-xl bg-muted font-mono text-xs text-foreground border border-border break-all">
+              {subscriptionId}
+            </div>
+          )}
 
-        <Link
-          href="/"
-          className="inline-block px-6 py-2.5 rounded-xl text-lg font-semibold border border-neutral-600/60 hover:border-neutral-200/80 hover:bg-neutral-800/40 transition active:scale-95"
-        >
-          Get Help
-        </Link>
-      </div>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="w-full rounded-xl"
+          >
+            <Link href="/" prefetch replace>
+              Go Home
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
     </main>
   );
 };

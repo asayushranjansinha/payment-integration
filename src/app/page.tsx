@@ -1,10 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   createRazorpayOrder,
   createRazorpaySubscription,
 } from "@/features/payments/razorpay/server/actions";
+import { Theme } from "@/features/theming/components/ThemeToggle";
 
 const CUSTOMER_EMAIL = "asayushranjansinha@gmail.com";
 const CUSTOMER_NAME = "Ayush Ranjan Sinha";
@@ -97,37 +106,40 @@ const Page = () => {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-neutral-900 to-black text-white flex items-center justify-center p-6">
-      <section className="w-full max-w-md bg-neutral-800/40 backdrop-blur-lg border border-neutral-700/50 rounded-2xl p-8 shadow-xl">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 space-y-8 bg-background">
+      <Theme
+        variant="tabs"
+        size="md"
+        showLabel
+        themes={["light", "dark", "system"]}
+      />
+
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold mb-2">
             Razorpay Test
-          </h1>
-          <p className="text-neutral-400 text-sm">
-            Payments & Subscriptions demo
-          </p>
-        </header>
+          </CardTitle>
+          <CardDescription>Payments & Subscriptions demo</CardDescription>
+        </CardHeader>
 
-        <div className="grid gap-4">
-          <button
-            onClick={handleOneTimePurchase}
-            className="w-full py-3 text-lg font-semibold rounded-2xl border border-neutral-600/60 hover:border-neutral-400 hover:bg-neutral-700/40 transition transform hover:scale-[1.02] active:scale-95 shadow-md"
-          >
+        <CardContent className="mt-6 flex flex-col gap-4">
+          <Button onClick={handleOneTimePurchase} className="w-full">
             Pay ₹100 Once
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={handleSubscriptionPurchase}
-            className="w-full py-3 text-lg font-semibold rounded-2xl border border-neutral-600/60 hover:border-neutral-400 hover:bg-neutral-700/40 transition transform hover:scale-[1.02] active:scale-95 shadow-md"
+            variant="secondary"
+            className="w-full"
           >
             Start Subscription
-          </button>
-        </div>
+          </Button>
+        </CardContent>
 
-        <footer className="text-center mt-8 text-neutral-500 text-xs">
+        <footer className="text-center mt-6 text-muted-foreground text-xs pb-4">
           Template • Next.js • Razorpay
         </footer>
-      </section>
+      </Card>
     </main>
   );
 };
