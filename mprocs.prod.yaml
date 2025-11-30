@@ -1,0 +1,5 @@
+procs:
+  start:
+    cmd: ["npm", "run", "build"]
+  serve:
+    cmd: ["npm", "run", "start"]
